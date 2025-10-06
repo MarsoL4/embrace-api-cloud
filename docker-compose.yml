@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16 # Use imagem oficial
+    container_name: embrace_db
+    environment:
+      - POSTGRES_USER=embrace_user
+      - POSTGRES_PASSWORD=embrace_pass
+      - POSTGRES_DB=embrace_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - embrace_network
+    restart: always
+
+  app:
+    build: ./Embrace.API
+    container_name: embrace_api
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    environment:
+      - ConnectionStrings__Postgres=Host=db;Port=5432;Database=embrace_db;Username=embrace_user;Password=embrace_pass
+    networks:
+      - embrace_network
+    restart: always
+    user: "1000:1000"
+
+volumes:
+  postgres_data:
+
+networks:
+  embrace_network:
