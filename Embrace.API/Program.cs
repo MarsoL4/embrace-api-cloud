@@ -34,7 +34,6 @@ namespace Embrace.API
             builder.Services.AddSwaggerGen(options =>
             {
                 options.ExampleFilters();
-                // Força a versão do OpenAPI para 3.0.0 para evitar problemas de renderização em alguns UIs
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
                     Title = "Embrace.API",
