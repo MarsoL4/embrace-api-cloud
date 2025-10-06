@@ -3,10 +3,10 @@
     public class Meta
     {
         public long Id { get; set; }
-        public string Descricao { get; set; }
+        public string Descricao { get; set; } = string.Empty;
         public int QuantidadeEsperada { get; set; }
         public long AcaoSolidariaId { get; set; }
 
-        public AcaoSolidaria AcaoSolidaria { get; set; }
+        public AcaoSolidaria AcaoSolidaria { get; set; } = null!;
     }
 }
