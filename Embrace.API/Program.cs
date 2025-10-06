@@ -26,10 +26,10 @@ namespace Embrace.API
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            var connectionString = builder.Configuration.GetConnectionString("Postgres");
+            var connectionString = builder.Configuration.GetConnectionString("SqlServer");
 
             builder.Services.AddDbContext<EmbraceDbContext>(options =>
-                options.UseNpgsql(connectionString));
+                options.UseSqlServer(connectionString));
 
             // AutoMapper
             builder.Services.AddAutoMapper(typeof(MappingProfile));

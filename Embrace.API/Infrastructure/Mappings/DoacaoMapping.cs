@@ -27,7 +27,6 @@ namespace Embrace.API.Infrastructure.Mappings
 
             builder.Property(d => d.DataRecebida)
                 .HasColumnName("DATA_RECEBIDA")
-                .HasColumnType("DATE")
                 .IsRequired();
 
             builder.Property(d => d.AcaoSolidariaId)
