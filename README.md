@@ -42,6 +42,7 @@ A Embrace API é uma solução desenvolvida em .NET 8 para gerenciamento de aç�
 - [Scripts de banco (DDL)](scripts/ddl.sql)
 - [Scripts de deploy na Azure CLI](scripts/deploy_commands.txt)
 - [Arquivo de configuração (`appsettings.json`)](Embrace.API/appsettings.json)
+- [Exemplos de payload para Swagger e testes (`Examples`)](Embrace.API/Examples/)
 
 ---
 
