@@ -61,28 +61,109 @@ cd embrace-api-cloud
 
 ### **2. Execute os comandos do CLI para provisionar recursos**
 
-Siga o passo a passo detalhado em [`scripts/deploy_commands.txt`](scripts/deploy_commands.txt):
+### **Requisitos**
 
-```sh
-# Exemplo resumido (veja detalhes no script):
-az group create --name embrace-rg --location brazilSouth
-az sql server create --name embracesqlserver --resource-group embrace-rg --location brazilSouth --admin-user embraceadmin --admin-password "Embrace#2025"
-az sql db create --resource-group embrace-rg --server embracesqlserver --name embrace-db --service-objective S0
-az sql server firewall-rule create --resource-group embrace-rg --server embracesqlserver --name AllowAzureServices --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
-az sql server firewall-rule create --resource-group embrace-rg --server embracesqlserver --name AllowLocal --start-ip-address <SEU_IP> --end-ip-address <SEU_IP>
-az appservice plan create --name embrace-plan --resource-group embrace-rg --location brazilSouth --sku B1
-az webapp create --resource-group embrace-rg --plan embrace-plan --name embrace-app --runtime "dotnet:8"
-az monitor app-insights component create --app embrace-insights --location brazilSouth --resource-group embrace-rg --application-type web
-az webapp config appsettings set --resource-group embrace-rg --name embrace-app --settings "APPINSIGHTS_INSTRUMENTATIONKEY=$(az monitor app-insights component show --app embrace-insights --resource-group embrace-rg --query 'instrumentationKey' -o tsv)"
-az webapp config connection-string set --resource-group embrace-rg --name embrace-app --connection-string-type SQLAzure --settings SqlServer="<String_Conexao_Completa>"
-dotnet publish -c Release -o ./publish
-Compress-Archive -Path ./publish/* -DestinationPath ./app.zip
-az webapp deployment source config-zip --resource-group embrace-rg --name embrace-app --src ./app.zip
+- Conta Azure, Azure CLI instalado e autenticado (`az login`)
+- .NET SDK 8.0+
+
+### 1. Clone o repositório
+
+```bash
+git clone https://github.com/MarsoL4/embrace-api-cloud.git
+cd embrace-api-cloud
 ```
+
+### 2. Crie os recursos na Azure via CLI (passo a passo)
+
+1. **Crie o grupo de recursos Azure**  
+   Este comando cria um agrupador para todos os recursos do projeto.
+   ```bash
+   az group create --name embrace-rg --location brazilSouth
+   ```
+
+2. **Crie o servidor SQL**  
+   Cria o servidor do banco de dados SQL na Azure, onde o banco será hospedado.
+   ```bash
+   az sql server create --name embracesqlserver --resource-group embrace-rg --location brazilSouth --admin-user embraceadmin --admin-password "Embrace#2025"
+   ```
+
+3. **Crie o banco de dados SQL**  
+   Cria o banco de dados dentro do servidor SQL criado no passo anterior.
+   ```bash
+   az sql db create --resource-group embrace-rg --server embracesqlserver --name embrace-db --service-objective S0
+   ```
+
+4. **Obtenha a string de conexão do banco**  
+   Exibe a string de conexão necessária para configurar a aplicação.
+   ```bash
+   az sql db show-connection-string --server embracesqlserver --name embrace-db --client ado.net
+   ```
+   > **Atenção:** Na string recebida, será necessário adicionar o usuário (`User ID`) e senha (`Password`) do banco de dados nos espaços indicados.
+
+5. **Libere acesso do App Service ao SQL**  
+   Permite que serviços da Azure conectem-se ao banco de dados.
+   ```bash
+   az sql server firewall-rule create --resource-group embrace-rg --server embracesqlserver --name AllowAzureServices --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+   ```
+
+6. **Libere acesso do seu IP ao SQL**  
+   Permite que você acesse o banco de dados diretamente pelo seu IP.
+   ```bash
+   az sql server firewall-rule create --resource-group embrace-rg --server embracesqlserver --name AllowLocal --start-ip-address <SEU_IP> --end-ip-address <SEU_IP>
+   ```
+   > Substitua `<SEU_IP>` pelo seu IP real.
+
+7. **Crie o plano do App Service**  
+   Cria o plano de hospedagem para o serviço de aplicação.
+   ```bash
+   az appservice plan create --name embrace-plan --resource-group embrace-rg --location brazilSouth --sku B1
+   ```
+
+8. **Crie o App Service (.NET 8)**  
+   Cria o serviço de aplicação onde a API será publicada.
+   ```bash
+   az webapp create --resource-group embrace-rg --plan embrace-plan --name embrace-app --runtime "dotnet:8"
+   ```
+
+9. **Crie o recurso do Application Insights**  
+   Cria o recurso para monitoramento da aplicação.
+   ```bash
+   az monitor app-insights component create --app embrace-insights --location brazilSouth --resource-group embrace-rg --application-type web
+   ```
+
+10. **Vincule o Application Insights ao App Service**  
+    ```bash
+    az webapp config appsettings set --resource-group embrace-rg --name embrace-app --settings "APPINSIGHTS_INSTRUMENTATIONKEY=$(az monitor app-insights component show --app embrace-insights --resource-group embrace-rg --query 'instrumentationKey' -o tsv)"
+    ```
+
+11. **Configure a string de conexão no App Service**  
+    Adiciona a string de conexão do banco (com usuário e senha) nas configurações do App Service.
+    ```bash
+    az webapp config connection-string set --resource-group embrace-rg --name embrace-app --connection-string-type SQLAzure --settings SqlServer="<String_Conexao_Completa>"
+    ```
+
+12. **Compile e publique o projeto**  
+    Compila o projeto para pasta de publicação.
+    ```bash
+    dotnet publish -c Release -o ./publish
+    ```
+
+13. **Compacte os arquivos publicados**  
+    Gera um arquivo ZIP para envio ao App Service.
+    ```bash
+    Compress-Archive -Path ./publish/* -DestinationPath ./app.zip
+    ```
+
+14. **Faça o deploy do ZIP para o App Service**  
+    Publica a API na Azure.
+    ```bash
+    az webapp deployment source config-zip --resource-group embrace-rg --name embrace-app --src ./app.zip
+    ```
 
 > **Atenção:**  
 > - Substitua `<SEU_IP>` pelo seu IP real.  
 > - Insira a string de conexão completa (com usuário e senha) no lugar de `<String_Conexao_Completa>`.
+
 
 ### **3. Acesse o Swagger UI**
 
