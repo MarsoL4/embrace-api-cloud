@@ -1,168 +1,125 @@
-# Embrace API – Sistema de Apoio em Situações de Emergência Climática
-
-## 📘 Visão Geral
-
-A Embrace é uma plataforma que atua como um hub digital unificado para situações de emergência climática, conectando ONGs, coletivos, voluntários e comunidades afetadas. O Embrace.API representa o núcleo backend dessa solução: uma API REST desenvolvida em .NET 8 para gerenciar ações solidárias em desastres naturais.
-
-- Cadastro de ONGs e ações solidárias
-- Registro e consulta de doações
-- Gerenciamento de voluntários
-- Visualização de pontos de coleta de alimentos
-- Integração com sistemas externos
+# Embrace API – Sistema de Apoio em Situações de Emergência Climática 🌎
 
 ---
 
-## 🧱 Arquitetura do Projeto
+## 👤 Integrantes
 
-### Arquitetura Atual (antes da modernização)
-```
-Usuário
-   |
-   v
-[Embrace.API (.NET 8)]
-   |
-   v
-[PostgreSQL]
-```
-
-### Arquitetura Futura (após Docker Compose)
-```
-Usuário
-   |
-   v
-[Container: Embrace.API]
-   |
-   v
-[Container: PostgreSQL]
-```
-Ambos conectados por uma rede Docker dedicada.
+**Nome do Grupo:** InnovexGroup  
+**Integrantes:**
+- Enzo Marsola (RM556310)
+- Cauan Cruz (RM558238)
+- Igor Barrocal (RM555217)
 
 ---
 
-## Análise da Arquitetura
+## 💡 Descrição da Solução
 
-- **Serviços do projeto:**
-  - Embrace.API (.NET 8)
-  - PostgreSQL (banco de dados)
-
-- **Dependências:**  
-  A aplicação depende do banco de dados para persistência das informações (ONGs, doações, voluntários, pontos de coleta, etc).
-
-- **Estratégia de containerização:**
-  - API: Imagem oficial do .NET 8, utilizando Dockerfile próprio.
-  - Banco: Imagem oficial do PostgreSQL, configurada por variáveis de ambiente.
+A Embrace API é uma solução desenvolvida em .NET 8 para gerenciamento de ações solidárias em situações de emergência climática, facilitando a conexão de ONGs, voluntários e comunidades afetadas. A API oferece endpoints completos para cadastro, consulta, atualização e remoção (CRUD) das principais entidades do sistema, integrando-se a um banco de dados SQL Server PaaS e monitoramento via Application Insights na Azure.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🏆 Benefícios
 
-- .NET 8
-- ASP.NET Core
-- C#
-- Entity Framework Core
-- Npgsql (PostgreSQL)
-- AutoMapper
-- Swagger
-- Docker e Docker Compose
+- Centralização da gestão de ações solidárias, doações e voluntários.
+- Persistência de dados em SQL Server na nuvem, com estrutura relacional e integridade.
+- Monitoramento automatizado via Application Insights.
+- Deploy automatizado via Azure CLI.
+- Documentação e exemplos completos via Swagger UI.
 
 ---
 
-## 🚀 Conteinerização com Docker Compose
+## 🗄️ Banco de Dados em Nuvem
 
-O projeto foi modernizado e utiliza Docker Compose para orquestrar os containers de aplicação e banco de dados.
-
-- 1 container para a API (.NET 8)
-- 1 container para o PostgreSQL (imagem oficial)
-- Usuário não-root para a aplicação
-- Volume nomeado para persistência do banco
-- Variáveis de ambiente para configuração
-- Rede dedicada para comunicação interna
-- Políticas de restart apropriadas
-- API exposta na porta 8080, banco na 5432
+- **Tecnologia:** Azure SQL Database (PaaS)
+- **Relacionamento:** Master-Detail (ONG → Ação Solidária → Doação; Voluntário, Ponto de Alimento)
+- **Script DDL:** [`scripts/ddl.sql`](scripts/ddl.sql)
 
 ---
 
-## ⚙️ Como Executar o Projeto
+## 🛠️ Conteúdo do Repositório
 
-### 1. Pré-requisitos
+- [Código-fonte da API (.NET)](Embrace.API)
+- [Scripts de banco (DDL)](scripts/ddl.sql)
+- [Scripts de deploy na Azure CLI](scripts/deploy_commands.txt)
+- [Arquivo de configuração (`appsettings.json`)](Embrace.API/appsettings.json)
 
-- Docker e Docker Compose instalados
+---
 
-### 2. Clonar o Repositório
+## ⚙️ How-To: Deploy Automatizado na Azure (CLI)
+
+### **Requisitos**
+
+- Conta Azure, Azure CLI instalado e autenticado (`az login`)
+- .NET SDK 8.0+
+
+### **1. Clone o repositório**
 
 ```bash
-git clone https://github.com/MarsoL4/embrace-api.git
-cd embrace-api
+git clone https://github.com/MarsoL4/embrace-api-cloud.git
+cd embrace-api-cloud
 ```
 
-### 3. Ajustar a string de conexão
+### **2. Execute os comandos do CLI para provisionar recursos**
 
-No arquivo `Embrace.API/appsettings.json`, confirme que a string está assim:
+Siga o passo a passo detalhado em [`scripts/deploy_commands.txt`](scripts/deploy_commands.txt):
+
+```sh
+# Exemplo resumido (veja detalhes no script):
+az group create --name embrace-rg --location brazilSouth
+az sql server create --name embracesqlserver --resource-group embrace-rg --location brazilSouth --admin-user embraceadmin --admin-password "Embrace#2025"
+az sql db create --resource-group embrace-rg --server embracesqlserver --name embrace-db --service-objective S0
+az sql server firewall-rule create --resource-group embrace-rg --server embracesqlserver --name AllowAzureServices --start-ip-address 0.0.0.0 --end-ip-address 0.0.0.0
+az sql server firewall-rule create --resource-group embrace-rg --server embracesqlserver --name AllowLocal --start-ip-address <SEU_IP> --end-ip-address <SEU_IP>
+az appservice plan create --name embrace-plan --resource-group embrace-rg --location brazilSouth --sku B1
+az webapp create --resource-group embrace-rg --plan embrace-plan --name embrace-app --runtime "dotnet:8"
+az monitor app-insights component create --app embrace-insights --location brazilSouth --resource-group embrace-rg --application-type web
+az webapp config appsettings set --resource-group embrace-rg --name embrace-app --settings "APPINSIGHTS_INSTRUMENTATIONKEY=$(az monitor app-insights component show --app embrace-insights --resource-group embrace-rg --query 'instrumentationKey' -o tsv)"
+az webapp config connection-string set --resource-group embrace-rg --name embrace-app --connection-string-type SQLAzure --settings SqlServer="<String_Conexao_Completa>"
+dotnet publish -c Release -o ./publish
+Compress-Archive -Path ./publish/* -DestinationPath ./app.zip
+az webapp deployment source config-zip --resource-group embrace-rg --name embrace-app --src ./app.zip
 ```
-"Postgres": "Host=db;Port=5432;Database=embrace_db;Username=embrace_user;Password=embrace_pass"
+
+> **Atenção:**  
+> - Substitua `<SEU_IP>` pelo seu IP real.  
+> - Insira a string de conexão completa (com usuário e senha) no lugar de `<String_Conexao_Completa>`.
+
+### **3. Acesse o Swagger UI**
+
+Após o deploy, acesse o Swagger via:
 ```
-
-### 4. Subir os containers
-
-```bash
-docker compose up --build
-```
-
-### 5. Popular o banco (se necessário)
-
-```bash
-docker compose exec app dotnet ef database update
+https://embrace-app.azurewebsites.net/swagger/index.html
 ```
 
 ---
 
-## ⛳ Comandos Essenciais Docker Compose
+## 🧑‍💻 Testando a API via Swagger
 
-- Subir containers:  
-  `docker compose up --build`
-- Parar containers:  
-  `docker compose down`
-- Ver logs:  
-  `docker compose logs -f`
-- Acessar terminal do container:  
-  `docker compose exec app /bin/bash`
+- Utilize o botão "Try it out" para testar todos os endpoints (ONG, Ação Solidária, Doação, Voluntário, Ponto de Alimento).
+- Os exemplos de requisição já estarão preenchidos para facilitar os testes.
+- É possível realizar operações CRUD completas, validando persistência no banco SQL Server Azure.
 
 ---
 
-## 🚀 Deploy Passo a Passo
+## 📄 Script DDL das Tabelas
 
-1. Clone o repositório.
-2. Ajuste variáveis de ambiente, se necessário.
-3. Garanta que a string de conexão está correta no `appsettings.json`.
-4. Suba os containers com `docker compose up --build`.
-5. Popular o banco (opcional) com `docker compose exec app dotnet ef database update`.
-6. Acesse a API via [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html).
+- O arquivo [`scripts/ddl.sql`](scripts/ddl.sql) contém toda a estrutura das tabelas, colunas, PKs, FKs e índices do banco.
+- Use-o para criar ou verificar a estrutura do banco conforme exigido no projeto.
 
 ---
 
-## 🛠 Troubleshooting Básico
+## 🎥 Vídeo Demonstrativo
 
-- **Erro de banco:** Confira usuário, senha e se a porta 5432 está livre.
-- **API não sobe:** Veja logs com `docker compose logs app`.
-- **Banco vazio:** Use o comando `docker compose exec app dotnet ef database update`.
-
----
-
-## 🧪 Testes (via Swagger)
-
-- Após subir o projeto, acesse: [http://localhost:8080/swagger/index.html](http://localhost:8080/swagger/index.html)
-- Realize operações CRUD em todos os recursos (ONGs, voluntários, doações, etc)
-
-Exemplos de payloads em [`docs/swagger-examples.json`](docs/swagger-examples.json).
+- O vídeo da entrega mostra:
+  - Criação dos recursos Azure via CLI
+  - Deploy da aplicação
+  - Execução de testes CRUD via Swagger
+  - Verificação da persistência dos dados no banco SQL Server Azure
+- **Link do vídeo:** [https://youtu.be/5euz19OZEVE]
 
 ---
 
-## 👨‍💻 Desenvolvido por
+## 🏗️ Arquitetura da Solução
 
-Time Embrace – GS 2025-1:
-
-- **Enzo Giuseppe Marsola** – RM: 556310  
-- **Cauan da Cruz Ferreira** – RM: 5558238  
-- **Igor dias Barrocal** – RM: 555217
-
----
+- **Recursos:** App Service (.NET 8), Azure SQL Database, Application Insights
+- **Fluxo:** Usuário → Embrace API (.NET 8) → SQL Server na nuvem → Application Insights para monitoramento
