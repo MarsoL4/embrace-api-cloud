@@ -6,14 +6,9 @@ namespace Embrace.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PontoDeAlimentoController : ControllerBase
+    public class PontoDeAlimentoController(PontoDeAlimentoService service) : ControllerBase
     {
-        private readonly PontoDeAlimentoService _service;
-
-        public PontoDeAlimentoController(PontoDeAlimentoService service)
-        {
-            _service = service;
-        }
+        private readonly PontoDeAlimentoService _service = service;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()

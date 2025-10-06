@@ -6,14 +6,9 @@ namespace Embrace.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class OngController : ControllerBase
+    public class OngController(OngService service) : ControllerBase
     {
-        private readonly OngService _service;
-
-        public OngController(OngService service)
-        {
-            _service = service;
-        }
+        private readonly OngService _service = service;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()

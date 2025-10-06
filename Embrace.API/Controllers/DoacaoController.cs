@@ -6,14 +6,9 @@ namespace Embrace.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class DoacaoController : ControllerBase
+    public class DoacaoController(DoacaoService service) : ControllerBase
     {
-        private readonly DoacaoService _service;
-
-        public DoacaoController(DoacaoService service)
-        {
-            _service = service;
-        }
+        private readonly DoacaoService _service = service;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()

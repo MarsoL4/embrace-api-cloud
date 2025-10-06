@@ -6,14 +6,9 @@ namespace Embrace.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class VoluntarioController : ControllerBase
+    public class VoluntarioController(VoluntarioService service) : ControllerBase
     {
-        private readonly VoluntarioService _service;
-
-        public VoluntarioController(VoluntarioService service)
-        {
-            _service = service;
-        }
+        private readonly VoluntarioService _service = service;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()

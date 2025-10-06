@@ -6,14 +6,9 @@ namespace Embrace.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AcaoSolidariaController : ControllerBase
+    public class AcaoSolidariaController(AcaoSolidariaService service) : ControllerBase
     {
-        private readonly AcaoSolidariaService _service;
-
-        public AcaoSolidariaController(AcaoSolidariaService service)
-        {
-            _service = service;
-        }
+        private readonly AcaoSolidariaService _service = service;
 
         [HttpGet]
         public async Task<IActionResult> GetAll()
