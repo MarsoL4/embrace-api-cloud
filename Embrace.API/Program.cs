@@ -8,6 +8,7 @@ using Embrace.API.Repositories.Interfaces;
 using Embrace.API.Repositories;
 using Swashbuckle.AspNetCore.Filters;
 using Embrace.API.Examples;
+using Microsoft.OpenApi.Models;
 
 namespace Embrace.API
 {
@@ -33,6 +34,12 @@ namespace Embrace.API
             builder.Services.AddSwaggerGen(options =>
             {
                 options.ExampleFilters();
+                // Força a versão do OpenAPI para 3.0.0 para evitar problemas de renderização em alguns UIs
+                options.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "Embrace.API",
+                    Version = "1.0"
+                });
             });
 
             var connectionString = builder.Configuration.GetConnectionString("SqlServer");
