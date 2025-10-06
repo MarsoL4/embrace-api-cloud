@@ -1,6 +1,8 @@
 ﻿using Embrace.API.DTOs;
 using Embrace.API.Services;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Filters;
+using Embrace.API.Examples;
 
 namespace Embrace.API.Controllers
 {
@@ -25,6 +27,7 @@ namespace Embrace.API.Controllers
         }
 
         [HttpPost]
+        [SwaggerRequestExample(typeof(OngDTO), typeof(OngDTOExample))]
         public async Task<IActionResult> Post([FromBody] OngDTO dto)
         {
             await _service.AddAsync(dto);

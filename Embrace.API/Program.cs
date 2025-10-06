@@ -6,6 +6,8 @@ using Embrace.API.Infrastructure.Repositories;
 using Embrace.API.Infrastructure.Repositories.Interfaces;
 using Embrace.API.Repositories.Interfaces;
 using Embrace.API.Repositories;
+using Swashbuckle.AspNetCore.Filters;
+using Embrace.API.Examples;
 
 namespace Embrace.API
 {
@@ -24,7 +26,14 @@ namespace Embrace.API
                 });
 
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+
+            // Registra os exemplos para o Swagger
+            builder.Services.AddSwaggerExamplesFromAssemblyOf<OngDTOExample>();
+
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.ExampleFilters();
+            });
 
             var connectionString = builder.Configuration.GetConnectionString("SqlServer");
 
