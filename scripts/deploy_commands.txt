@@ -35,7 +35,7 @@ az monitor app-insights component create --app embrace-insights --location brazi
 az webapp config appsettings set --resource-group embrace-rg --name embrace-app --settings "APPINSIGHTS_INSTRUMENTATIONKEY=$(az monitor app-insights component show --app embrace-insights --resource-group embrace-rg --query 'instrumentationKey' -o tsv)"
 
 # Configura string de conexão no App Service (adicione a String de Conexão exibida no comando acima atualizada com o Usuário e Senha do Banco)
-az webapp config connection-string set --resource-group embrace-rg --name embrace-app --connection-string-type SQLAzure --settings DefaultConnection="<String_Recebida>"
+az webapp config connection-string set --resource-group embrace-rg --name embrace-app --connection-string-type SQLAzure --settings SqlServer="<String_Recebida>"
 
 # Publica projeto para pasta de deploy
 dotnet publish -c Release -o ./publish
