@@ -1,12 +1,12 @@
 # Embrace API – Sistema de Apoio em Situações de Emergência Climática 🌎
 
-## 👤 Integrantes
+👨‍💻 **Integrantes**
 
-**Nome do Grupo:** InnovexGroup  
-**Integrantes:**
-- Enzo Marsola (RM556310)
-- Cauan Cruz (RM558238)
-- Igor Barrocal (RM555217)
+Time Embrace – GS 2025-1:
+
+- **Enzo Giuseppe Marsola** – RM: 556310, Turma: 2TDSPK  
+- **Rafael de Souza Pinto** – RM: 555130, Turma: 2TDSPY  
+- **Luiz Paulo F. Fernandes** – RM: 555497, Turma: 2TDSPF
 
 ---
 
